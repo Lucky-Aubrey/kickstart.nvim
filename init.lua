@@ -68,7 +68,7 @@ vim.opt.cursorline = true
 -- Minimal number of screen lines to keep above and below the cursor.
 vim.opt.scrolloff = 15
 
--- [[ Basic Keymaps ]]
+-- [[ Basic Keymaps ]] Lucky's Customization
 --  See `:help vim.keymap.set()`
 -- Open explorer with keymap
 vim.keymap.set('n', '<Leader>pv', vim.cmd.Ex, { desc = 'Open explorer' })
@@ -77,11 +77,19 @@ vim.keymap.set('n', '<Leader>pv', vim.cmd.Ex, { desc = 'Open explorer' })
 vim.keymap.set('n', '<Leader>omrc', ':tabnew | e $MYVIMRC <Enter>', { desc = 'Open my vimrc file' })
 
 -- Set the python interpreter for running a python script
--- local conda_env = 'vis-training-data'
-local conda_env = 'hotrolling-visualization'
+local conda_env = 'vis-training-data'
+-- local conda_env = 'hotrolling-visualization'
 local conda_python = '/home/laptopuser/miniconda3/envs/' .. conda_env .. '/bin/python'
 -- Run python code with python interpreter from anaconda environment
 vim.keymap.set('n', '<Leader>rp', ':w !' .. conda_python .. '  % <Enter>', { desc = 'Run python code' })
+-- Run pdb debugger
+vim.keymap.set('n', '<Leader>rd', function()
+  local current_file_path = vim.api.nvim_buf_get_name(0) -- Get the current file path
+  vim.cmd 'vsplit'
+  vim.cmd 'term'
+  vim.cmd 'call feedkeys("i")' -- Switch to insert mode
+  vim.fn.feedkeys(conda_python .. ' -m pdb ' .. current_file_path .. '\n')
+end, { desc = 'Open terminal in new tab and run Python script with current file path' })
 
 -- Open terminal in new tab
 -- vim.keymap.set('n', '<Leader>ot', ':tabnew <Enter> :term <Enter>', { desc = 'Open terminal in new tab' })
@@ -153,17 +161,22 @@ end
 -- Escape jk
 vim.keymap.set('i', 'jk', '<Esc>', { desc = 'Escape' })
 vim.keymap.set('v', 'jk', '<Esc>', { desc = 'Escape' })
+vim.keymap.set('t', 'jk', '<C-\\><C-n> ', { desc = 'Escape' })
 
+-- Close tab when in terminal mode
+vim.keymap.set('t', '<C-q>', '<C-\\><C-n>:tabclose<CR>', { desc = 'Close tab in terminal mode' })
 -- yank current file path to register
 vim.keymap.set('n', '<Leader>l', ':let @+=expand("%:p") <Enter>', { desc = 'Save abs path of current file' })
-
--- Set highlight on search, but clear on pressing <Esc> in normal mode
-vim.opt.hlsearch = true
-vim.keymap.set('n', '<Esc>', '<cmd>nohlsearch<CR>')
 
 -- Netrw settings
 vim.g.netrw_banner = 0
 vim.g.netrw_winsizr = 14
+
+-- [ End of Lucky's Customization ]
+
+-- Set highlight on search, but clear on pressing <Esc> in normal mode
+vim.opt.hlsearch = true
+vim.keymap.set('n', '<Esc>', '<cmd>nohlsearch<CR>')
 
 -- Diagnostic keymaps
 vim.keymap.set('n', '[d', vim.diagnostic.goto_prev, { desc = 'Go to previous [D]iagnostic message' })
