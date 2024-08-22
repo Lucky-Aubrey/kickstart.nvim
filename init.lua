@@ -1,89 +1,3 @@
---[[
-
-=====================================================================
-==================== READ THIS BEFORE CONTINUING ====================
-=====================================================================
-========                                    .-----.          ========
-========         .----------------------.   | === |          ========
-========         |.-""""""""""""""""""-.|   |-----|          ========
-========         ||                    ||   | === |          ========
-========         ||   KICKSTART.NVIM   ||   |-----|          ========
-========         ||                    ||   | === |          ========
-========         ||                    ||   |-----|          ========
-========         ||:Tutor              ||   |:::::|          ========
-========         |'-..................-'|   |____o|          ========
-========         `"")----------------(""`   ___________      ========
-========        /::::::::::|  |::::::::::\  \ no mouse \     ========
-========       /:::========|  |==hjkl==:::\  \ required \    ========
-========      '""""""""""""'  '""""""""""""'  '""""""""""'   ========
-========                                                     ========
-=====================================================================
-=====================================================================
-
-What is Kickstart?
-
-  Kickstart.nvim is *not* a distribution.
-
-  Kickstart.nvim is a starting point for your own configuration.
-    The goal is that you can read every line of code, top-to-bottom, understand
-    what your configuration is doing, and modify it to suit your needs.
-
-    Once you've done that, you can start exploring, configuring and tinkering to
-    make Neovim your own! That might mean leaving Kickstart just the way it is for a while
-    or immediately breaking it into modular pieces. It's up to you!
-
-    If you don't know anything about Lua, I recommend taking some time to read through
-    a guide. One possible example which will only take 10-15 minutes:
-      - https://learnxinyminutes.com/docs/lua/
-
-    After understanding a bit more about Lua, you can use `:help lua-guide` as a
-    reference for how Neovim integrates Lua.
-    - :help lua-guide
-    - (or HTML version): https://neovim.io/doc/user/lua-guide.html
-
-Kickstart Guide:
-
-  TODO: The very first thing you should do is to run the command `:Tutor` in Neovim.
-
-    If you don't know what this means, type the following:
-      - <escape key>
-      - :
-      - Tutor
-      - <enter key>
-
-    (If you already know the Neovim basics, you can skip this step.)
-
-  Once you've completed that, you can continue working through **AND READING** the rest
-  of the kickstart init.lua.
-
-  Next, run AND READ `:help`.
-    This will open up a help window with some basic information
-    about reading, navigating and searching the builtin help documentation.
-
-    This should be the first place you go to look when you're stuck or confused
-    with something. It's one of my favorite Neovim features.
-
-    MOST IMPORTANTLY, we provide a keymap "<space>sh" to [s]earch the [h]elp documentation,
-    which is very useful when you're not exactly sure of what you're looking for.
-
-  I have left several `:help X` comments throughout the init.lua
-    These are hints about where to find more information about the relevant settings,
-    plugins or Neovim features used in Kickstart.
-
-   NOTE: Look for lines like this
-
-    Throughout the file. These are for you, the reader, to help you understand what is happening.
-    Feel free to delete them once you know what you're doing, but they should serve as a guide
-    for when you are first encountering a few different constructs in your Neovim config.
-
-If you experience any errors while trying to install kickstart, run `:checkhealth` for more info.
-
-I hope you enjoy your Neovim journey,
-- TJ
-
-P.S. You can delete this when you're done too. It's your config now! :)
---]]
-
 -- Set <space> as the leader key
 -- See `:help mapleader`
 --  NOTE: Must happen before plugins are loaded (otherwise wrong leader will be used)
@@ -102,7 +16,7 @@ vim.g.have_nerd_font = false
 vim.opt.number = true
 -- You can also add relative line numbers, to help with jumping.
 --  Experiment for yourself to see if you like it!
--- vim.opt.relativenumber = true
+vim.opt.relativenumber = true
 
 -- Enable mouse mode, can be useful for resizing splits for example!
 vim.opt.mouse = 'a'
@@ -152,14 +66,104 @@ vim.opt.inccommand = 'split'
 vim.opt.cursorline = true
 
 -- Minimal number of screen lines to keep above and below the cursor.
-vim.opt.scrolloff = 10
+vim.opt.scrolloff = 15
 
 -- [[ Basic Keymaps ]]
 --  See `:help vim.keymap.set()`
+-- Open explorer with keymap
+vim.keymap.set('n', '<Leader>pv', vim.cmd.Ex, { desc = 'Open explorer' })
+
+-- Open my vimrc file
+vim.keymap.set('n', '<Leader>omrc', ':tabnew | e $MYVIMRC <Enter>', { desc = 'Open my vimrc file' })
+
+-- Set the python interpreter for running a python script
+-- local conda_env = 'vis-training-data'
+local conda_env = 'hotrolling-visualization'
+local conda_python = '/home/laptopuser/miniconda3/envs/' .. conda_env .. '/bin/python'
+-- Run python code with python interpreter from anaconda environment
+vim.keymap.set('n', '<Leader>rp', ':w !' .. conda_python .. '  % <Enter>', { desc = 'Run python code' })
+
+-- Open terminal in new tab
+-- vim.keymap.set('n', '<Leader>ot', ':tabnew <Enter> :term <Enter>', { desc = 'Open terminal in new tab' })
+vim.keymap.set('n', '<Leader>ot', function()
+  local current_file_path = vim.api.nvim_buf_get_name(0) -- Get the current file path
+  vim.cmd 'tabnew'
+  vim.cmd 'term'
+  vim.cmd 'call feedkeys("i")' -- Switch to insert mode
+  vim.fn.feedkeys(conda_python .. ' ' .. current_file_path .. '\n')
+end, { desc = 'Open terminal in new tab and run Python script with current file path' })
+
+-- Vertical split
+vim.keymap.set('n', '<Leader>v', ':vsplit <Enter>', { desc = 'Vertical split' })
+
+-- Horizontal split
+vim.keymap.set('n', '<Leader>h', ':split <Enter>', { desc = 'Horizontal split' })
+
+-- Increase split size
+vim.keymap.set('n', '<A-j>', ':vertical resize +5 <Enter>', { desc = 'Increase split size' })
+
+-- Decrease split size
+vim.keymap.set('n', '<A-k>', ':vertical resize -5 <Enter>', { desc = 'Decrease split size' })
+
+-- Same split size
+vim.keymap.set('n', '<A-=>', '<C-W><C-=>', { desc = 'Same split size' })
+-- vim.keymap.set('n', '<A-=>', ':horizontal wincmd =', { desc = 'Decrease split size' })
+-- Save current file
+vim.keymap.set('n', '<Leader>ww', ':w <Enter>', { desc = 'Save current file' })
+
+-- Open new Tab
+vim.keymap.set('n', '<Leader>tn', ':tabnew <Enter>', { desc = 'Open new Tab' })
+
+-- Switch to next tab
+vim.keymap.set('n', '<A-l>', ':tabn <Enter>', { desc = 'Switch to next tab' })
+
+-- Switch to previous tab
+vim.keymap.set('n', '<A-h>', ':tabp <Enter>', { desc = 'Switch to previous tab' })
+
+-- Make Session
+vim.keymap.set('n', '<Leader>mks', ':mks! ~/Documents/vimsessions/mysession.vim <Enter>', { desc = 'Save current session' })
+
+-- Load Session
+vim.keymap.set('n', '<Leader>mkl', ':source ~/Documents/vimsessions/mysession.vim <Enter>', { desc = 'Load last session' })
+
+-- Load Session
+vim.keymap.set('n', '<Leader>mko', ':source ~/Documents/vimsessions/', { desc = 'Open specific vimsession' })
+
+-- Show Session Directory
+vim.keymap.set(
+  'n',
+  '<leader>mkd',
+  ':lua print_directory_contents("~/Documents/vimsessions/") <Enter>',
+  { desc = 'Print vimsessions', noremap = true, silent = true }
+)
+
+-- Function to print the directory contents
+function print_directory_contents(dir)
+  local handle = io.popen('ls ' .. dir)
+  local result = handle:read '*a'
+  handle:close()
+
+  -- Print the result in the Neovim command area or output in a new buffer
+  print(result)
+  -- Alternatively, open a new scratch buffer and insert the contents there:
+  -- vim.api.nvim_command('enew')
+  -- vim.api.nvim_buf_set_lines(0, 0, -1, false, vim.split(result, '\n'))
+end
+
+-- Escape jk
+vim.keymap.set('i', 'jk', '<Esc>', { desc = 'Escape' })
+vim.keymap.set('v', 'jk', '<Esc>', { desc = 'Escape' })
+
+-- yank current file path to register
+vim.keymap.set('n', '<Leader>l', ':let @+=expand("%:p") <Enter>', { desc = 'Save abs path of current file' })
 
 -- Set highlight on search, but clear on pressing <Esc> in normal mode
 vim.opt.hlsearch = true
 vim.keymap.set('n', '<Esc>', '<cmd>nohlsearch<CR>')
+
+-- Netrw settings
+vim.g.netrw_banner = 0
+vim.g.netrw_winsizr = 14
 
 -- Diagnostic keymaps
 vim.keymap.set('n', '[d', vim.diagnostic.goto_prev, { desc = 'Go to previous [D]iagnostic message' })
@@ -189,6 +193,7 @@ vim.keymap.set('n', '<C-h>', '<C-w><C-h>', { desc = 'Move focus to the left wind
 vim.keymap.set('n', '<C-l>', '<C-w><C-l>', { desc = 'Move focus to the right window' })
 vim.keymap.set('n', '<C-j>', '<C-w><C-j>', { desc = 'Move focus to the lower window' })
 vim.keymap.set('n', '<C-k>', '<C-w><C-k>', { desc = 'Move focus to the upper window' })
+vim.keymap.set('n', '<C-q>', '<C-w><C-q>', { desc = 'Close split/window' })
 
 -- [[ Basic Autocommands ]]
 --  See `:help lua-guide-autocommands`
@@ -555,6 +560,8 @@ require('lazy').setup({
       local capabilities = vim.lsp.protocol.make_client_capabilities()
       capabilities = vim.tbl_deep_extend('force', capabilities, require('cmp_nvim_lsp').default_capabilities())
 
+      capabilities.workspace.didChangeWatchedFiles.dynamicRegistration = false
+
       -- Enable the following language servers
       --  Feel free to add/remove any LSPs that you want here. They will automatically be installed.
       --
@@ -567,7 +574,7 @@ require('lazy').setup({
       local servers = {
         -- clangd = {},
         -- gopls = {},
-        -- pyright = {},
+        pyright = {},
         -- rust_analyzer = {},
         -- ... etc. See `:help lspconfig-all` for a list of all the pre-configured LSPs
         --
@@ -785,6 +792,7 @@ require('lazy').setup({
       -- Like many other themes, this one has different styles, and you could load
       -- any other, such as 'tokyonight-storm', 'tokyonight-moon', or 'tokyonight-day'.
       vim.cmd.colorscheme 'tokyonight-night'
+      vim.api.nvim_set_hl(0, 'Normal', { bg = 'None' })
 
       -- You can configure highlights by doing something like:
       vim.cmd.hi 'Comment gui=none'
