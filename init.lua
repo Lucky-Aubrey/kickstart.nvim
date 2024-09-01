@@ -77,13 +77,24 @@ vim.keymap.set('n', '<Leader>pv', vim.cmd.Ex, { desc = 'Open explorer' })
 vim.keymap.set('n', '<Leader>omrc', ':tabnew | e $MYVIMRC <Enter>', { desc = 'Open my vimrc file' })
 
 -- Set the python interpreter for running a python script
-local conda_env = 'vis-training-data'
--- local conda_env = 'hotrolling-visualization'
-local conda_python = '/home/laptopuser/miniconda3/envs/' .. conda_env .. '/bin/python'
+
 -- Run python code with python interpreter from anaconda environment
-vim.keymap.set('n', '<Leader>rp', ':w !' .. conda_python .. '  % <Enter>', { desc = 'Run python code' })
+vim.keymap.set('n', '<Leader>rp', function()
+  local conda_python = FindPythonConfigFile()
+  if conda_python == nil then
+    print 'Could not run python'
+    return
+  end
+  vim.fn.feedkeys(':w !' .. conda_python .. '  % \n')
+end, { desc = 'Run python code' })
+
 -- Run pdb debugger
 vim.keymap.set('n', '<Leader>rd', function()
+  local conda_python = FindPythonConfigFile()
+  if conda_python == nil then
+    print 'Could not run python'
+    return
+  end
   local current_file_path = vim.api.nvim_buf_get_name(0) -- Get the current file path
   vim.cmd 'vsplit'
   vim.cmd 'term'
@@ -94,6 +105,11 @@ end, { desc = 'Open terminal in new tab and run Python script with current file 
 -- Open terminal in new tab
 -- vim.keymap.set('n', '<Leader>ot', ':tabnew <Enter> :term <Enter>', { desc = 'Open terminal in new tab' })
 vim.keymap.set('n', '<Leader>ot', function()
+  local conda_python = FindPythonConfigFile()
+  if conda_python == nil then
+    print 'Could not run python'
+    return
+  end
   local current_file_path = vim.api.nvim_buf_get_name(0) -- Get the current file path
   vim.cmd 'tabnew'
   vim.cmd 'term'
@@ -171,6 +187,58 @@ vim.keymap.set('n', '<Leader>l', ':let @+=expand("%:p") <Enter>', { desc = 'Save
 -- Netrw settings
 vim.g.netrw_banner = 0
 vim.g.netrw_winsizr = 14
+
+-- Experimental
+function FindPythonConfigFile()
+  local current_dir = vim.fn.expand '%:p:h'
+  local config_file = ''
+  local src_parent_directory = 0
+
+  while current_dir ~= '/' do
+    -- Construct the path to the potential config file in the current directory
+    local possible_config_file = current_dir .. '/python.config'
+
+    -- Check if the config file exists in the current directory
+    if vim.fn.filereadable(possible_config_file) == 1 then
+      config_file = possible_config_file
+      break
+    end
+
+    if src_parent_directory == 1 then
+      break
+    end
+
+    -- Stop if we reach the parent directory of 'src'
+    if vim.fn.fnamemodify(current_dir, ':t') == 'src' then
+      src_parent_directory = 1
+    end
+
+    -- Move to the parent directory
+    current_dir = vim.fn.fnamemodify(current_dir, ':h')
+  end
+
+  if config_file == '' then
+    print 'No python.config file found.'
+    return
+  end
+
+  local python_env = vim.fn.readfile(config_file)[1]
+  if python_env == nil then
+    print 'python.config file is empty.'
+    return
+  end
+
+  return python_env
+end
+
+function RunPythonWithEnv()
+  local python_env = FindPythonConfigFile()
+  if python_env == nil then
+    print 'Could not run python'
+  else
+    vim.cmd('!' .. python_env .. ' ' .. vim.fn.expand '%:p')
+  end
+end
 
 -- [ End of Lucky's Customization ]
 
