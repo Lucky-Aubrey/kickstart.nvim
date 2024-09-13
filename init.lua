@@ -89,7 +89,7 @@ vim.keymap.set('n', '<Leader>rp', function()
 end, { desc = 'Run python code' })
 
 -- Run pdb debugger
-vim.keymap.set('n', '<Leader>rd', function()
+vim.keymap.set('n', '<Leader>pdb', function()
   local conda_python = FindPythonConfigFile()
   if conda_python == nil then
     print 'Could not run python'
@@ -140,12 +140,17 @@ vim.keymap.set('n', '<Leader>tn', ':tabnew <Enter>', { desc = 'Open new Tab' })
 
 -- Switch to next tab
 vim.keymap.set('n', '<A-l>', ':tabn <Enter>', { desc = 'Switch to next tab' })
+vim.keymap.set('t', '<A-l>', '<C-\\><C-n>:tabn <Enter>', { desc = 'Switch to next tab' })
 
 -- Switch to previous tab
 vim.keymap.set('n', '<A-h>', ':tabp <Enter>', { desc = 'Switch to previous tab' })
+vim.keymap.set('t', '<A-h>', '<C-\\><C-n>:tabp <Enter>', { desc = 'Switch to previous tab' })
 
 -- Make Session
 vim.keymap.set('n', '<Leader>mks', ':mks! ~/Documents/vimsessions/mysession.vim <Enter>', { desc = 'Save current session' })
+
+-- Make Session
+vim.keymap.set('n', '<Leader>mkn', ':mks! ~/Documents/vimsessions/', { desc = 'Save current session+assign name' })
 
 -- Load Session
 vim.keymap.set('n', '<Leader>mkl', ':source ~/Documents/vimsessions/mysession.vim <Enter>', { desc = 'Load last session' })
